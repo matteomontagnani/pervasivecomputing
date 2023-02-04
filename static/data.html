@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #map {
+          height: 70%;
+        }
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+        .center {
+            margin: auto;
+            width: 50%;
+            padding: 10px;
+        }
+        
+#floating-panel {
+  position: absolute;
+  top: 10px;
+  left: 25%;
+  z-index: 5;
+  background-color: #fff;
+  padding: 5px;
+  border: 1px solid #999;
+  text-align: center;
+  font-family: "Roboto", "sans-serif";
+  line-height: 30px;
+  padding-left: 10px;
+}
+
+#floating-panel {
+  background-color: #fff;
+  border: 1px solid #999;
+  left: 25%;
+  padding: 5px;
+  position: absolute;
+  top: 10px;
+  z-index: 5;
+}
+      </style>
+    <title>Data</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+</head>
+<body>
+  <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand">Kellogg Biological Data</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/logout">Logout</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+      <div id="map"></div>
+      <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-6">    
+                <div class="row align-items-center p-2">
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="basic-addon1">Anno</span>
+                            </div>
+                            <select class="form-select" id="year">
+                              <option value="" selected>All Year</option>
+                              <option value="2007">2007</option>
+                              <option value="2008">2008</option>
+                              <option value="2009">2009</option>
+                              <option value="2010">2010</option>
+                              <option value="2011">2011</option>
+                              <option value="2012">2012</option>
+                  
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="basic-addon1">Specie</span>
+                            </div>
+                            <select class="form-select" id="specie">
+                              <option value="" selected>All Species</option>
+                              <option value="wheat" >wheat</option>
+                              <option value="corn" >corn</option>
+                              <option value="soybeans" >soybeans</option>
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="basic-addon1">Limite</span>
+                            </div>
+                            <input type="text" class="form-control" id="limit">
+                          </div>
+                    </div>
+                    <button id="load" type="button" class="btn btn-primary btn-block">Carica i dati</button>
+                    <div class="d-flex justify-content-center mt-2">
+                        <div id="spinner" class="spinner-border d-none" role="status">
+                            <span class="sr-only"></span>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+            <div class="col-md-3">
+                
+            </div>
+        </div>
+      </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+<!-- API KEY: AIzaSyBxUaB9wCmpXZjc6UcM6fmb3dFcNP3V074 -->
+
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxUaB9wCmpXZjc6UcM6fmb3dFcNP3V074&callback=initMap&libraries=visualization">
+</script>
+
+<script>
+// definisci le variabili necessarie, map ed heatmap
+let map, heatmap;
+function initMap() {
+  // dichiarazione e creazione in un MVCArray
+  // ovvero un array "osservabile" ed aggiornabile
+  pointArray = new google.maps.MVCArray()
+  
+  // dichiarazione e creazione di una mappa
+  map = new google.maps.Map(document.getElementById("map"), {
+    // zoom 14 sulla mappa
+    zoom: 14,
+    // centro della mappa
+    center: { lat: 42.41006, lng: -85.37561 }
+  });
+  // creazione di un layer aggiuntivo di punti da visualizzare sulla mappa
+  heatmap = new google.maps.visualization.HeatmapLayer({
+    // dati da visualizzare
+    data: pointArray,
+    // mappa sulla quale visualizzare i punti
+    map: map,
+  });
+}
+// quando la libreria di google viene creata,
+// automaticamente viene eseguita una callback initMap
+// dichiariamo quindi che questa callback deve essere la nostra funzione di 
+// inizializzazione della mappa
+window.initMap = initMap;
+
+
+// ascolta l'evento "click" sul pulsante "load"
+
+document.getElementById("load").addEventListener("click", () => {
+
+    // una volta cliccato, attiva la spinner
+    document.getElementById("spinner").classList.toggle("d-none")
+
+    // pulire mappa da dati precedenti
+    pointArray.clear()
+    
+    // ottenere i parametri di input dall'input
+    year = document.getElementById("year").value
+    specie = document.getElementById("specie").value
+    limit = document.getElementById("limit").value
+    
+    // richiedere i dati all'API del backend
+    fetch(window.location.origin + `/getpoint?year=${year}&specie=${specie}&limit=${limit}`)
+    .then((response) => response.json())
+    .then((data) => {
+
+        // Se c'è un errore, allora allerta l'utente
+        if (typeof(data) == "string") {
+            // rimuovi la spinnner
+            document.getElementById("spinner").classList.toggle("d-none");
+            // visualizza l'errore
+            alert(data);
+            return
+        }
+        // aggiungi i dati alla mappa
+        data.forEach(element => {
+            lat = parseFloat(element.posizione_lat)
+            lon = parseFloat(element.posizione_long)
+            weight = parseFloat(element.yield)
+            pointArray.push(new google.maps.LatLng(lat, lon, weight))
+        });
+        // rimuovi la spinner
+        document.getElementById("spinner").classList.toggle("d-none")
+    });
+
+})
+
+</script>
+</html>
